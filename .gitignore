@@ -1,0 +1,8 @@
+pnm_library_01_2022/**
+.DS_Store
+
+*.o
+
+lz77_encoding
+lz77_decoding
+compare_pgm_images
