@@ -112,6 +112,17 @@ void save_LZ77_encoded_image(char *encoded_image_name, size_t num_tokens,
     fclose(encoded_file);
 }
 
+float compute_avg(unsigned int *nums, size_t length) {
+    float avg = 0;
+
+    for (size_t i = 0; i < length; i++) {
+        avg += nums[i];
+    }
+
+    avg = avg / length;
+    return avg;
+}
+
 void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
                        unsigned int searching_buffer_size,
                        float *avg_offset_Ptr, float *std_offset_Ptr,
@@ -152,8 +163,10 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
 
     // TODO: calculate average offset and store
     // calculate standard deviation of the offset and store
+    *avg_offset_Ptr = compute_avg(offsets, num_tokens);
 
     // TODO: calculate average match length and store
+    *avg_length_Ptr = compute_avg(matching_lengths, num_tokens);
 
     // TODO: calculate standard deviation of the match length and store
 
