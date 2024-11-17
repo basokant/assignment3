@@ -22,15 +22,14 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
                      size_t num_symbols, unsigned int **offsets,
                      unsigned int **matching_lengths,
                      unsigned int **next_symbols) {
+    size_t num_tokens = 0;
+
     *offsets = calloc(num_symbols, sizeof(*offsets));
     *matching_lengths = calloc(num_symbols, sizeof(*matching_lengths));
     *next_symbols = calloc(num_symbols, sizeof(*next_symbols));
-    size_t num_tokens = 0;
 
     size_t buffer_start = 0;
     size_t data_start = 0;
-
-    size_t next_token_idx = 0;
 
     while (data_start < num_symbols) {
         // encode the next symbol(s) to a token
@@ -58,11 +57,10 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
         }
 
         // add that token to the tokens list
-        *offsets[next_token_idx] = offset;
-        *matching_lengths[next_token_idx] = matching_length;
-        *next_symbols[next_token_idx] = next_symbol;
+        *offsets[num_tokens] = offset;
+        *matching_lengths[num_tokens] = matching_length;
+        *next_symbols[num_tokens] = next_symbol;
 
-        next_token_idx += 1;
         num_tokens += 1;
 
         // update buffer to include encoded symbols in searching buffer.
