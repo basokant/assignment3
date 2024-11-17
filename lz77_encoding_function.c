@@ -28,10 +28,8 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
     size_t data_start = 0;
 
     while (data_start < num_symbols) {
-        printf("loop start (num_symbols: %zu, num_tokens: %zu)\n", num_symbols,
-               num_tokens);
-        printf("data_start: %zu, buffer_start: %zu, num_tokens: %zu\n",
-               data_start, buffer_start, num_tokens);
+        /* printf("data_start: %zu, buffer_start: %zu, num_tokens: %zu\n", */
+        /*        data_start, buffer_start, num_tokens); */
 
         // encode the next symbol(s) to a token
         unsigned int offset = 0;
@@ -91,10 +89,8 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
         if (data_start - buffer_start > searching_buffer_size) {
             buffer_start = data_start - searching_buffer_size;
         }
-        printf("loop end data_start=%zu\n\n", data_start);
     }
 
-    printf("out of the loop");
     return num_tokens;
 }
 
@@ -126,11 +122,11 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
     size_t num_symbols = original_image.width * original_image.height;
     unsigned char *symbols = flatten_image(&original_image);
 
-    printf("\n");
-    for (int i = 0; i < num_symbols; i++) {
-        printf("%c", symbols[i]);
-    }
-    printf("\n\n");
+    /* printf("\n"); */
+    /* for (int i = 0; i < num_symbols; i++) { */
+    /*     printf("%c", symbols[i]); */
+    /* } */
+    /* printf("\n\n"); */
 
     unsigned int *offsets = calloc(num_symbols, sizeof(*offsets));
     unsigned int *matching_lengths =
@@ -140,13 +136,12 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
     size_t num_tokens =
         LZ77_tokenize(searching_buffer_size, symbols, num_symbols, offsets,
                       matching_lengths, next_symbols);
-    printf("done tokenizing");
 
-    char *encoded_image_name = NULL;
+    char encoded_image_name[1024];
     sprintf(encoded_image_name, "%s.%u.lz", in_PGM_filename_Ptr,
             searching_buffer_size);
 
-    save_LZ77_encoded_image(in_PGM_filename_Ptr, num_tokens,
+    save_LZ77_encoded_image(encoded_image_name, num_tokens,
                             original_image.width, original_image.height,
                             original_image.maxGrayValue, offsets,
                             matching_lengths, next_symbols);
