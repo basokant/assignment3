@@ -19,21 +19,19 @@ unsigned char *flatten_image(struct PGM_Image *image) {
 }
 
 size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
-                     size_t num_symbols, unsigned int **offsets,
-                     unsigned int **matching_lengths,
-                     unsigned char **next_symbols) {
+                     size_t num_symbols, unsigned int *offsets,
+                     unsigned int *matching_lengths,
+                     unsigned char *next_symbols) {
     size_t num_tokens = 0;
-
-    *offsets = calloc(num_symbols, sizeof(*offsets));
-    *matching_lengths = calloc(num_symbols, sizeof(*matching_lengths));
-    *next_symbols = calloc(num_symbols, sizeof(*next_symbols));
 
     size_t buffer_start = 0;
     size_t data_start = 0;
 
     while (data_start < num_symbols) {
-        /* printf("data_start: %zu, buffer_start: %zu, num_tokens: %zu\n", */
-        /*        data_start, buffer_start, num_tokens); */
+        printf("loop start (num_symbols: %zu, num_tokens: %zu)\n", num_symbols,
+               num_tokens);
+        printf("data_start: %zu, buffer_start: %zu, num_tokens: %zu\n",
+               data_start, buffer_start, num_tokens);
 
         // encode the next symbol(s) to a token
         unsigned int offset = 0;
@@ -47,7 +45,10 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
             /* printf("start: %d\n", start); */
 
             int length;
-            for (length = 0; length < data_start - start; length++) {
+            for (length = 0;
+                 length < data_start - start && start + length < num_symbols &&
+                 data_start + length < num_symbols;
+                 length++) {
                 unsigned char search_symbol = symbols[start + length];
                 unsigned char symbol = symbols[data_start + length];
                 /* printf("search_symbol (%d): %c, symbol (%zu): %c\n", */
@@ -58,7 +59,7 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
 
             // TODO: handle cycling match
 
-            if (length >= matching_length) {
+            if (length > 0 && length >= matching_length) {
                 offset = data_start - start;
                 matching_length = length;
                 next_symbol = symbols[data_start + length];
@@ -68,9 +69,16 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
             }
         }
 
-        (*offsets)[num_tokens] = offset;
-        (*matching_lengths)[num_tokens] = matching_length;
-        (*next_symbols)[num_tokens] = next_symbol;
+        if (num_tokens >= num_symbols) {
+            fprintf(stderr,
+                    "Error: num_tokens (%zu) exceeds num_symbols (%zu)\n",
+                    num_tokens, num_symbols);
+            exit(EXIT_FAILURE);
+        }
+
+        offsets[num_tokens] = offset;
+        matching_lengths[num_tokens] = matching_length;
+        next_symbols[num_tokens] = next_symbol;
         /* printf("offset: %u, matching_length: %u, next_symbol %c\n", offset,
          */
         /*        matching_length, next_symbol); */
@@ -83,8 +91,10 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
         if (data_start - buffer_start > searching_buffer_size) {
             buffer_start = data_start - searching_buffer_size;
         }
+        printf("loop end data_start=%zu\n\n", data_start);
     }
 
+    printf("out of the loop");
     return num_tokens;
 }
 
@@ -122,13 +132,15 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
     }
     printf("\n\n");
 
-    unsigned int *offsets;
-    unsigned int *matching_lengths;
-    unsigned char *next_symbols;
+    unsigned int *offsets = calloc(num_symbols, sizeof(*offsets));
+    unsigned int *matching_lengths =
+        calloc(num_symbols, sizeof(*matching_lengths));
+    unsigned char *next_symbols = calloc(num_symbols, sizeof(*next_symbols));
 
     size_t num_tokens =
-        LZ77_tokenize(searching_buffer_size, symbols, num_symbols, &offsets,
-                      &matching_lengths, &next_symbols);
+        LZ77_tokenize(searching_buffer_size, symbols, num_symbols, offsets,
+                      matching_lengths, next_symbols);
+    printf("done tokenizing");
 
     char *encoded_image_name = NULL;
     sprintf(encoded_image_name, "%s.%u.lz", in_PGM_filename_Ptr,
