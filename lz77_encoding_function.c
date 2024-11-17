@@ -18,20 +18,13 @@ unsigned char *flatten_image(struct PGM_Image *image) {
     return flattened_image;
 }
 
-void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
-                       unsigned int searching_buffer_size,
-                       float *avg_offset_Ptr, float *std_offset_Ptr,
-                       float *avg_length_Ptr, float *std_length_Ptr) {
-    struct PGM_Image original_image;
-    load_PGM_Image(&original_image, in_PGM_filename_Ptr);
-    size_t num_symbols = original_image.width * original_image.height;
-
-    unsigned char *symbols = flatten_image(&original_image);
-
-    unsigned int *offsets = calloc(num_symbols, sizeof(*offsets));
-    unsigned int *matching_lengths =
-        calloc(num_symbols, sizeof(*matching_lengths));
-    char *next_symbols = calloc(num_symbols, sizeof(*next_symbols));
+size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
+                     size_t num_symbols, unsigned int **offsets,
+                     unsigned int **matching_lengths,
+                     unsigned int **next_symbols) {
+    *offsets = calloc(num_symbols, sizeof(*offsets));
+    *matching_lengths = calloc(num_symbols, sizeof(*matching_lengths));
+    *next_symbols = calloc(num_symbols, sizeof(*next_symbols));
     size_t num_tokens = 0;
 
     size_t buffer_start = 0;
@@ -65,9 +58,9 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
         }
 
         // add that token to the tokens list
-        offsets[next_token_idx] = offset;
-        matching_lengths[next_token_idx] = matching_length;
-        next_symbols[next_token_idx] = next_symbol;
+        *offsets[next_token_idx] = offset;
+        *matching_lengths[next_token_idx] = matching_length;
+        *next_symbols[next_token_idx] = next_symbol;
 
         next_token_idx += 1;
         num_tokens += 1;
@@ -78,6 +71,27 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
             buffer_start = data_start - searching_buffer_size;
         }
     }
+
+    return num_tokens;
+}
+
+void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
+                       unsigned int searching_buffer_size,
+                       float *avg_offset_Ptr, float *std_offset_Ptr,
+                       float *avg_length_Ptr, float *std_length_Ptr) {
+    struct PGM_Image original_image;
+    load_PGM_Image(&original_image, in_PGM_filename_Ptr);
+    size_t num_symbols = original_image.width * original_image.height;
+
+    unsigned char *symbols = flatten_image(&original_image);
+
+    unsigned int *offsets;
+    unsigned int *matching_lengths;
+    unsigned int *next_symbols;
+
+    size_t num_tokens =
+        LZ77_tokenize(searching_buffer_size, symbols, num_symbols, &offsets,
+                      &matching_lengths, &next_symbols);
 
     // create header with number_of_tokens
     // open file for writing the encoded image (same name with searching buffer
@@ -97,6 +111,7 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
     // calculate standard deviation of the match length and store
 
     free_PGM_Image(&original_image);
+    free(symbols);
     free(offsets);
     free(matching_lengths);
     free(next_symbols);
