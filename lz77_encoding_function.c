@@ -37,7 +37,7 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
         unsigned int matching_length = 0;
         char next_symbol = symbols[data_start];
 
-        // find longest match in searching buffer
+        // the longest match in searching buffer is the next token
         size_t start;
         for (start = buffer_start; start < data_start; start++) {
             size_t length;
@@ -56,7 +56,6 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
             }
         }
 
-        // add that token to the tokens list
         *offsets[num_tokens] = offset;
         *matching_lengths[num_tokens] = matching_length;
         *next_symbols[num_tokens] = next_symbol;
@@ -71,6 +70,24 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
     }
 
     return num_tokens;
+}
+
+void save_LZ77_encoded_image(char *encoded_image_name, size_t num_tokens,
+                             int width, int height, int max_gray_value,
+                             unsigned int *offsets,
+                             unsigned int *matching_lengths,
+                             unsigned int *next_symbols) {
+    FILE *encoded_file = fopen(encoded_image_name, "w");
+
+    struct LZ77_Header header = {num_tokens, width, height, max_gray_value};
+    fwrite(&header, sizeof(header), 1, encoded_file);
+
+    fwrite(offsets, sizeof(*offsets), num_tokens, encoded_file);
+    fwrite(matching_lengths, sizeof(*matching_lengths), num_tokens,
+           encoded_file);
+    fwrite(next_symbols, sizeof(*next_symbols), num_tokens, encoded_file);
+
+    fclose(encoded_file);
 }
 
 void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
@@ -91,15 +108,14 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
         LZ77_tokenize(searching_buffer_size, symbols, num_symbols, &offsets,
                       &matching_lengths, &next_symbols);
 
-    struct LZ77_Header header = {num_tokens, original_image.width,
-                                 original_image.height,
-                                 original_image.maxGrayValue};
-    // create header with number_of_tokens
-    // open file for writing the encoded image (same name with searching buffer
-    // size and .lz concatenated)
+    char *encoded_image_name;
+    sprintf(encoded_image_name, "%s.%u.lz", in_PGM_filename_Ptr,
+            searching_buffer_size);
 
-    // save header to file
-    // save tokens to file
+    save_LZ77_encoded_image(in_PGM_filename_Ptr, num_tokens,
+                            original_image.width, original_image.height,
+                            original_image.maxGrayValue, offsets,
+                            matching_lengths, next_symbols);
 
     // write offset histogram data to another file
 

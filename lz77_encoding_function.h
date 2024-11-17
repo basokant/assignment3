@@ -4,7 +4,7 @@
 #define LZ77_ENCODING_FUNCTION
 
 struct LZ77_Header {
-    int num_tokens;
+    unsigned int num_tokens;
     int width, height;
     int max_gray_value;
 };
