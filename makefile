@@ -6,7 +6,7 @@
 
 #==================================================
 # MACRO definitions
-CFLAG = -std=c99 -Wall
+CFLAG = -std=c99 -Wall -g -O0
 CC = gcc
 LIBS = -lm
 
@@ -176,18 +176,20 @@ testCompression: lz77_encoding
 #
 	@echo "----------------------------------------"
 	@echo "Generating  LZ77 compressed images"
-	@echo 
-	./lz77_encoding peppers.raw.pgm 5120
-	@echo "----------------------------------------"
-	./lz77_encoding peppers.raw.pgm 1024
-	@echo "----------------------------------------"
-	./lz77_encoding peppers.raw.pgm 256
-	@echo "----------------------------------------"
-	./lz77_encoding goldhill.raw.pgm 5120
-	@echo "----------------------------------------"
-	./lz77_encoding goldhill.raw.pgm 1024
-	@echo "----------------------------------------"
-	./lz77_encoding goldhill.raw.pgm 256
+	@echo
+	./lz77_encoding test.ascii.pgm 5120
+	# @echo 
+	# ./lz77_encoding peppers.raw.pgm 5120
+	# @echo "----------------------------------------"
+	# ./lz77_encoding peppers.raw.pgm 1024
+	# @echo "----------------------------------------"
+	# ./lz77_encoding peppers.raw.pgm 256
+	# @echo "----------------------------------------"
+	# ./lz77_encoding goldhill.raw.pgm 5120
+	# @echo "----------------------------------------"
+	# ./lz77_encoding goldhill.raw.pgm 1024
+	# @echo "----------------------------------------"
+	# ./lz77_encoding goldhill.raw.pgm 256
 	@echo "----------------------------------------"
 
 testDecompression: lz77_decoding
