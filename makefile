@@ -6,7 +6,7 @@
 
 #==================================================
 # MACRO definitions
-CFLAG = -std=c99 -Wall -g -O0
+CFLAG = -std=c99 -Wall
 CC = gcc
 LIBS = -lm
 
