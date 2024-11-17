@@ -21,7 +21,7 @@ unsigned char *flatten_image(struct PGM_Image *image) {
 size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
                      size_t num_symbols, unsigned int **offsets,
                      unsigned int **matching_lengths,
-                     unsigned int **next_symbols) {
+                     unsigned char **next_symbols) {
     size_t num_tokens = 0;
 
     *offsets = calloc(num_symbols, sizeof(*offsets));
@@ -31,11 +31,13 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
     size_t buffer_start = 0;
     size_t data_start = 0;
 
+    printf("LZ77 Tokens\n\n");
+
     while (data_start < num_symbols) {
         // encode the next symbol(s) to a token
         unsigned int offset = data_start;
         unsigned int matching_length = 0;
-        char next_symbol = symbols[data_start];
+        unsigned char next_symbol = symbols[data_start];
 
         // the longest match in searching buffer is the next token
         size_t start;
@@ -59,6 +61,7 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
         *offsets[num_tokens] = offset;
         *matching_lengths[num_tokens] = matching_length;
         *next_symbols[num_tokens] = next_symbol;
+        printf("%8u %8u %8c\n", offset, matching_length, next_symbol);
 
         num_tokens += 1;
 
@@ -76,7 +79,7 @@ void save_LZ77_encoded_image(char *encoded_image_name, size_t num_tokens,
                              int width, int height, int max_gray_value,
                              unsigned int *offsets,
                              unsigned int *matching_lengths,
-                             unsigned int *next_symbols) {
+                             unsigned char *next_symbols) {
     FILE *encoded_file = fopen(encoded_image_name, "w");
 
     struct LZ77_Header header = {num_tokens, width, height, max_gray_value};
@@ -102,7 +105,7 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
 
     unsigned int *offsets;
     unsigned int *matching_lengths;
-    unsigned int *next_symbols;
+    unsigned char *next_symbols;
 
     size_t num_tokens =
         LZ77_tokenize(searching_buffer_size, symbols, num_symbols, &offsets,
