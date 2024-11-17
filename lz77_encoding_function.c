@@ -15,12 +15,6 @@ unsigned char *flatten_image(struct PGM_Image *image) {
         }
     }
 
-    printf("\n");
-    for (int i = 0; i < num_pixels; i++) {
-        printf("%c", flattened_image[i]);
-    }
-    printf("\n\n");
-
     return flattened_image;
 }
 
@@ -38,48 +32,49 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
     size_t data_start = 0;
 
     while (data_start < num_symbols) {
-        printf("data_start: %zu, buffer_start: %zu, num_tokens: %zu\n",
-               data_start, buffer_start, num_tokens);
+        /* printf("data_start: %zu, buffer_start: %zu, num_tokens: %zu\n", */
+        /*        data_start, buffer_start, num_tokens); */
 
         // encode the next symbol(s) to a token
         unsigned int offset = 0;
         unsigned int matching_length = 0;
         unsigned char next_symbol = symbols[data_start];
-        printf("initial match: start: %zu, length: %u, next_symbol: %c\n",
-               data_start, matching_length, next_symbol);
+        /* printf("initial match. start: %zu, length: %u, next_symbol: %c\n", */
+        /*        data_start, matching_length, next_symbol); */
 
         // the longest match in searching buffer is the next token
-        size_t start;
-        for (start = buffer_start; start < data_start; start++) {
-            printf("start: %zu\n", start);
+        for (int start = buffer_start; start < data_start; start++) {
+            /* printf("start: %d\n", start); */
 
-            size_t length;
+            int length;
             for (length = 0; length < data_start - start; length++) {
-                char search_symbol = symbols[start + length];
-                char symbol = symbols[data_start + length];
-                printf("search_symbol: %c, symbol: %c\n", search_symbol,
-                       symbol);
+                unsigned char search_symbol = symbols[start + length];
+                unsigned char symbol = symbols[data_start + length];
+                /* printf("search_symbol (%d): %c, symbol (%zu): %c\n", */
+                /*        start + length, search_symbol, data_start + length, */
+                /*        symbol); */
                 if (search_symbol != symbol) break;
             }
 
             // TODO: handle cycling match
 
-            if (length > matching_length) {
+            if (length >= matching_length) {
                 offset = data_start - start;
                 matching_length = length;
                 next_symbol = symbols[data_start + length];
-                printf(
-                    "longer match: start: %zu, length: %zu, next_symbol: %c\n",
-                    start, length, next_symbol);
+                /* printf("longer match. start: %d, length: %d, next_symbol:
+                 * %c\n", */
+                /*        start, length, next_symbol); */
             }
         }
 
-        *offsets[num_tokens] = offset;
-        *matching_lengths[num_tokens] = matching_length;
-        *next_symbols[num_tokens] = next_symbol;
-        printf("offset: %u, matching_length: %u, next_symbol %c\n\n", offset,
-               matching_length, next_symbol);
-        /* printf("%8u %8u %8c\n\n", offset, matching_length, next_symbol); */
+        (*offsets)[num_tokens] = offset;
+        (*matching_lengths)[num_tokens] = matching_length;
+        (*next_symbols)[num_tokens] = next_symbol;
+        /* printf("offset: %u, matching_length: %u, next_symbol %c\n", offset,
+         */
+        /*        matching_length, next_symbol); */
+        printf("%u %u '%c'\n", offset, matching_length, next_symbol);
 
         num_tokens += 1;
 
@@ -120,6 +115,12 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
 
     size_t num_symbols = original_image.width * original_image.height;
     unsigned char *symbols = flatten_image(&original_image);
+
+    printf("\n");
+    for (int i = 0; i < num_symbols; i++) {
+        printf("%c", symbols[i]);
+    }
+    printf("\n\n");
 
     unsigned int *offsets;
     unsigned int *matching_lengths;
