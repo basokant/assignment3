@@ -1,5 +1,13 @@
+#include <stdlib.h>
+
 #ifndef LZ77_ENCODING_FUNCTION
 #define LZ77_ENCODING_FUNCTION
+
+struct LZ77_Header {
+    int num_tokens;
+    int width, height;
+    int max_gray_value;
+};
 
 void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
                        unsigned int searching_buffer_size,

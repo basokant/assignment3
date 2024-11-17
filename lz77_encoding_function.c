@@ -79,8 +79,8 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
                        float *avg_length_Ptr, float *std_length_Ptr) {
     struct PGM_Image original_image;
     load_PGM_Image(&original_image, in_PGM_filename_Ptr);
-    size_t num_symbols = original_image.width * original_image.height;
 
+    size_t num_symbols = original_image.width * original_image.height;
     unsigned char *symbols = flatten_image(&original_image);
 
     unsigned int *offsets;
@@ -91,6 +91,9 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
         LZ77_tokenize(searching_buffer_size, symbols, num_symbols, &offsets,
                       &matching_lengths, &next_symbols);
 
+    struct LZ77_Header header = {num_tokens, original_image.width,
+                                 original_image.height,
+                                 original_image.maxGrayValue};
     // create header with number_of_tokens
     // open file for writing the encoded image (same name with searching buffer
     // size and .lz concatenated)
