@@ -4,6 +4,20 @@
 
 #include "libpnm.h"
 
+unsigned char *flatten_image(struct PGM_Image *image) {
+    size_t num_pixels = image->width * image->height;
+    unsigned char *flattened_image =
+        calloc(num_pixels, sizeof(*flattened_image));
+
+    for (int row = 0; row < image->height; row++) {
+        for (int col = 0; col < image->width; col++) {
+            flattened_image[row * image->width + col] = image->image[row][col];
+        }
+    }
+
+    return flattened_image;
+}
+
 void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
                        unsigned int searching_buffer_size,
                        float *avg_offset_Ptr, float *std_offset_Ptr,
@@ -12,13 +26,7 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
     load_PGM_Image(&original_image, in_PGM_filename_Ptr);
     size_t num_symbols = original_image.width * original_image.height;
 
-    unsigned char *symbols = calloc(num_symbols, sizeof(*symbols));
-    for (int row = 0; row < original_image.height; row++) {
-        for (int col = 0; col < original_image.width; col++) {
-            symbols[row * original_image.width + col] =
-                original_image.image[row][col];
-        }
-    }
+    unsigned char *symbols = flatten_image(&original_image);
 
     unsigned int *offsets = calloc(num_symbols, sizeof(*offsets));
     unsigned int *matching_lengths =
