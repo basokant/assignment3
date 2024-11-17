@@ -27,7 +27,6 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
     size_t num_tokens = 0;
 
     size_t buffer_start = 0;
-    size_t buffer_end = 0;
     size_t data_start = 0;
 
     size_t next_token_idx = 0;
@@ -40,9 +39,9 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
 
         // find longest match in searching buffer
         size_t start;
-        for (start = buffer_start; start < buffer_end; start++) {
+        for (start = buffer_start; start < data_start; start++) {
             size_t length;
-            for (length = 0; length < buffer_end - start; length++) {
+            for (length = 0; length < data_start - start; length++) {
                 char search_symbol = symbols[start + length];
                 char symbol = symbols[data_start + length];
                 if (search_symbol != symbol) break;
@@ -50,7 +49,7 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
 
             // handle cycling match
 
-            if (length < matching_length) {
+            if (length > matching_length) {
                 offset = data_start - start;
                 matching_length = length;
                 next_symbol = symbols[data_start + length];
@@ -65,11 +64,11 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
         next_token_idx += 1;
         num_tokens += 1;
 
-        // update buffer_start, buffer_end to include encoded symbols in
-        // searching buffer.
-
-        // update data_start to exclude encoded symbols from the data left to be
-        // encoded
+        // update buffer to include encoded symbols in searching buffer.
+        data_start = data_start + matching_length;
+        if (data_start - buffer_start > searching_buffer_size) {
+            buffer_start = data_start - searching_buffer_size;
+        }
     }
 
     // create header with number_of_tokens
