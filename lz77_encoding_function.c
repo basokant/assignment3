@@ -81,7 +81,7 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
         /* printf("offset: %u, matching_length: %u, next_symbol %c\n", offset,
          */
         /*        matching_length, next_symbol); */
-        printf("%u %u '%c'\n", offset, matching_length, next_symbol);
+        /* printf("%u %u '%c'\n", offset, matching_length, next_symbol); */
 
         num_tokens += 1;
 
@@ -100,7 +100,7 @@ void save_LZ77_encoded_image(char *encoded_image_name, size_t num_tokens,
                              unsigned int *offsets,
                              unsigned int *matching_lengths,
                              unsigned char *next_symbols) {
-    FILE *encoded_file = fopen(encoded_image_name, "w");
+    FILE *encoded_file = fopen(encoded_image_name, "wb");
 
     struct LZ77_Header header = {num_tokens, width, height, max_gray_value};
     fwrite(&header, sizeof(header), 1, encoded_file);
