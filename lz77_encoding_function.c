@@ -1,5 +1,6 @@
 #include "lz77_encoding_function.h"
 
+#include <math.h>
 #include <stdlib.h>
 
 #include "libpnm.h"
@@ -119,8 +120,18 @@ float compute_avg(unsigned int *nums, size_t length) {
         avg += nums[i];
     }
 
-    avg = avg / length;
-    return avg;
+    return avg / length;
+}
+
+float compute_std_dev(float avg, unsigned int *nums, size_t length) {
+    float std = 0;
+
+    for (int i = 0; i < length; i++) {
+        std += (nums[i] - avg) * (nums[i] - avg);
+    }
+
+    std = std / length;
+    return sqrt(std);
 }
 
 void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
@@ -164,9 +175,12 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
     // TODO: calculate average offset and store
     // calculate standard deviation of the offset and store
     *avg_offset_Ptr = compute_avg(offsets, num_tokens);
+    *std_offset_Ptr = compute_std_dev(*avg_offset_Ptr, offsets, num_tokens);
 
     // TODO: calculate average match length and store
     *avg_length_Ptr = compute_avg(matching_lengths, num_tokens);
+    *std_length_Ptr =
+        compute_std_dev(*avg_length_Ptr, matching_lengths, num_tokens);
 
     // TODO: calculate standard deviation of the match length and store
 
