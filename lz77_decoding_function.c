@@ -21,6 +21,8 @@ unsigned char *decode_lz77_tokens(size_t num_tokens, int num_symbols,
             symbols[data_start + j] = symbols[data_start - offset + j];
         }
 
+        // TODO: handle cycles
+
         // add next symbol
         symbols[data_start + matching_length] = next_symbol;
         data_start += matching_length + 1;
