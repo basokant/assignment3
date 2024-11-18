@@ -199,17 +199,19 @@ testDecompression: lz77_decoding
 	@echo "----------------------------------------"
 	@echo "Generating  LZ77 compressed images"
 	@echo 
-	./lz77_decoding peppers.raw.pgm.5120.lz
-	@echo "----------------------------------------"
-	./lz77_decoding peppers.raw.pgm.1024.lz
-	@echo "----------------------------------------"
-	./lz77_decoding peppers.raw.pgm.256.lz
-	@echo "----------------------------------------"
-	./lz77_decoding goldhill.raw.pgm.5120.lz
-	@echo "----------------------------------------"
-	./lz77_decoding goldhill.raw.pgm.1024.lz
-	@echo "----------------------------------------"
-	./lz77_decoding goldhill.raw.pgm.256.lz
+	./lz77_decoding test.ascii.pgm.5120.lz
+	# @echo 
+	# ./lz77_decoding peppers.raw.pgm.5120.lz
+	# @echo "----------------------------------------"
+	# ./lz77_decoding peppers.raw.pgm.1024.lz
+	# @echo "----------------------------------------"
+	# ./lz77_decoding peppers.raw.pgm.256.lz
+	# @echo "----------------------------------------"
+	# ./lz77_decoding goldhill.raw.pgm.5120.lz
+	# @echo "----------------------------------------"
+	# ./lz77_decoding goldhill.raw.pgm.1024.lz
+	# @echo "----------------------------------------"
+	# ./lz77_decoding goldhill.raw.pgm.256.lz
 	@echo "----------------------------------------"
 
 testComparingImages: compare_pgm_images
