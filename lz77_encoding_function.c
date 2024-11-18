@@ -172,17 +172,12 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
 
     // TODO: write match length histogram data to another file
 
-    // TODO: calculate average offset and store
-    // calculate standard deviation of the offset and store
     *avg_offset_Ptr = compute_avg(offsets, num_tokens);
     *std_offset_Ptr = compute_std_dev(*avg_offset_Ptr, offsets, num_tokens);
 
-    // TODO: calculate average match length and store
     *avg_length_Ptr = compute_avg(matching_lengths, num_tokens);
     *std_length_Ptr =
         compute_std_dev(*avg_length_Ptr, matching_lengths, num_tokens);
-
-    // TODO: calculate standard deviation of the match length and store
 
     free_PGM_Image(&original_image);
     free(symbols);
