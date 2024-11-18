@@ -176,8 +176,6 @@ testCompression: lz77_encoding
 #
 	@echo "----------------------------------------"
 	@echo "Generating  LZ77 compressed images"
-	@echo
-	./lz77_encoding test.ascii.pgm 5120
 	@echo 
 	./lz77_encoding peppers.raw.pgm 5120
 	@echo "----------------------------------------"
