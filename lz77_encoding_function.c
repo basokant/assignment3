@@ -133,23 +133,22 @@ float compute_std_dev(float avg, unsigned int *nums, size_t length) {
     return sqrt(std / length);
 }
 
-void write_offset_histogram(char *histogram_file_name, unsigned int *offsets,
-                            size_t num_offsets,
-                            unsigned int searching_buffer_size) {
-    size_t *offset_freq = calloc(searching_buffer_size, sizeof(*offset_freq));
+void write_histogram(char *histogram_file_name, unsigned int *nums,
+                     size_t length, unsigned int max_num) {
+    size_t *frequencies = calloc(max_num, sizeof(*frequencies));
 
-    for (int i = 0; i < num_offsets; i++) {
-        unsigned int offset = offsets[i];
-        offset_freq[offset] += 1;
+    for (int i = 0; i < length; i++) {
+        unsigned int num = nums[i];
+        frequencies[num] += 1;
     }
 
     FILE *histogram_file = fopen(histogram_file_name, "wb");
     char csv_row[1024];
-    for (int offset = 0; offset < searching_buffer_size; offset++) {
-        size_t freq = offset_freq[offset];
+    for (int num = 0; num < max_num; num++) {
+        size_t freq = frequencies[num];
         if (freq <= 0) continue;
 
-        sprintf(csv_row, "%d, %zu\n", offset, freq);
+        sprintf(csv_row, "%d, %zu\n", num, freq);
         size_t row_length = strlen(csv_row);
 
         fwrite(csv_row, sizeof(*csv_row), row_length, histogram_file);
@@ -196,10 +195,15 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
     sprintf(offset_histogram_file_name, "%s.%u.offsets.csv",
             in_PGM_filename_Ptr, searching_buffer_size);
 
-    write_offset_histogram(offset_histogram_file_name, offsets, num_tokens,
-                           searching_buffer_size);
+    write_histogram(offset_histogram_file_name, offsets, num_tokens,
+                    searching_buffer_size);
 
-    // TODO: write match length histogram data to another file
+    char length_histogram_file_name[1024];
+    sprintf(length_histogram_file_name, "%s.%u.lengths.csv",
+            in_PGM_filename_Ptr, searching_buffer_size);
+
+    write_histogram(length_histogram_file_name, matching_lengths, num_tokens,
+                    num_symbols);
 
     *avg_offset_Ptr = compute_avg(offsets, num_tokens);
     *std_offset_Ptr = compute_std_dev(*avg_offset_Ptr, offsets, num_tokens);
