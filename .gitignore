@@ -8,3 +8,6 @@ lz77_decoding
 compare_pgm_images
 
 *.lz
+*.lz.pgm
+*.lengths.csv
+*.offsets.csv
