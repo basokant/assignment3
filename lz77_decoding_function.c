@@ -52,10 +52,10 @@ void Decode_Using_LZ77(char *in_compressed_filename_Ptr) {
           compressed_file);
     fclose(compressed_file);
 
-    for (int i = 0; i < header.num_tokens; i++) {
-        printf("%u %u '%c'\n", offsets[i], matching_lengths[i],
-               next_symbols[i]);
-    }
+    /* for (int i = 0; i < header.num_tokens; i++) { */
+    /*     printf("%u %u '%c'\n", offsets[i], matching_lengths[i], */
+    /*            next_symbols[i]); */
+    /* } */
 
     size_t num_pixels = header.height * header.width;
     unsigned char *flattened_image = decode_lz77_tokens(
