@@ -21,8 +21,6 @@ unsigned char *decode_lz77_tokens(size_t num_tokens, int num_symbols,
             symbols[data_start + j] = symbols[data_start - offset + j];
         }
 
-        // TODO: handle cycles
-
         // add next symbol
         symbols[data_start + matching_length] = next_symbol;
         data_start += matching_length + 1;
@@ -51,11 +49,6 @@ void Decode_Using_LZ77(char *in_compressed_filename_Ptr) {
     fread(next_symbols, sizeof(*next_symbols), header.num_tokens,
           compressed_file);
     fclose(compressed_file);
-
-    /* for (int i = 0; i < header.num_tokens; i++) { */
-    /*     printf("%u %u '%c'\n", offsets[i], matching_lengths[i], */
-    /*            next_symbols[i]); */
-    /* } */
 
     size_t num_pixels = header.height * header.width;
     unsigned char *flattened_image = decode_lz77_tokens(

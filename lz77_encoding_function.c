@@ -31,59 +31,55 @@ size_t LZ77_tokenize(unsigned int searching_buffer_size, unsigned char *symbols,
     size_t data_start = 0;
 
     while (data_start < num_symbols) {
-        /* printf("data_start: %zu, buffer_start: %zu, num_tokens: %zu\n", */
-        /*        data_start, buffer_start, num_tokens); */
-
         // encode the next symbol(s) to a token
         unsigned int offset = 0;
         unsigned int matching_length = 0;
         unsigned char next_symbol = symbols[data_start];
-        /* printf("initial match. start: %zu, length: %u, next_symbol: %c\n", */
-        /*        data_start, matching_length, next_symbol); */
 
         // the longest match in searching buffer is the next token
-        for (int start = buffer_start; start < data_start; start++) {
-            /* printf("start: %d\n", start); */
-
+        for (int search_start = buffer_start; search_start < data_start;
+             search_start++) {
             int length;
-            for (length = 0;
-                 length < data_start - start && start + length < num_symbols &&
-                 data_start + length < num_symbols;
+            for (length = 0; length < data_start - search_start &&
+                             search_start + length < num_symbols &&
+                             data_start + length < num_symbols;
                  length++) {
-                unsigned char search_symbol = symbols[start + length];
+                unsigned char search_symbol = symbols[search_start + length];
                 unsigned char symbol = symbols[data_start + length];
-                /* printf("search_symbol (%d): %c, symbol (%zu): %c\n", */
-                /*        start + length, search_symbol, data_start + length, */
-                /*        symbol); */
+
                 if (search_symbol != symbol) break;
             }
 
-            // TODO: handle cycling match
-
             if (length > 0 && length >= matching_length) {
-                offset = data_start - start;
+                offset = data_start - search_start;
                 matching_length = length;
                 next_symbol = symbols[data_start + length];
-                /* printf("longer match. start: %d, length: %d, next_symbol:
-                 * %c\n", */
-                /*        start, length, next_symbol); */
             }
         }
 
-        if (num_tokens >= num_symbols) {
-            fprintf(stderr,
-                    "Error: num_tokens (%zu) exceeds num_symbols (%zu)\n",
-                    num_tokens, num_symbols);
-            exit(EXIT_FAILURE);
+        if (matching_length > 0 && offset == matching_length) {
+            int search_start = offset;
+            int length;
+            for (length = 0;
+                 data_start - search_start + length < num_symbols &&
+                 data_start + matching_length + length < num_symbols;
+                 length++) {
+                unsigned char search_symbol =
+                    symbols[data_start - search_start + length];
+                unsigned char symbol =
+                    symbols[data_start + matching_length + length];
+
+                if (search_symbol != symbol) break;
+            }
+
+            matching_length += length - 1;
+            next_symbol = symbols[data_start + matching_length];
         }
 
         offsets[num_tokens] = offset;
         matching_lengths[num_tokens] = matching_length;
         next_symbols[num_tokens] = next_symbol;
-        /* printf("offset: %u, matching_length: %u, next_symbol %c\n", offset,
-         */
-        /*        matching_length, next_symbol); */
-        /* printf("%u %u '%c'\n", offset, matching_length, next_symbol); */
+        /* printf("%u %u '%u'\n", offset, matching_length, next_symbol); */
 
         num_tokens += 1;
 
@@ -166,12 +162,6 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
 
     size_t num_symbols = original_image.width * original_image.height;
     unsigned char *symbols = flatten_image(&original_image);
-
-    /* printf("\n"); */
-    /* for (int i = 0; i < num_symbols; i++) { */
-    /*     printf("%c", symbols[i]); */
-    /* } */
-    /* printf("\n\n"); */
 
     unsigned int *offsets = calloc(num_symbols, sizeof(*offsets));
     unsigned int *matching_lengths =
