@@ -1,7 +1,9 @@
 #include "lz77_encoding_function.h"
 
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "libpnm.h"
 
@@ -115,7 +117,6 @@ void save_LZ77_encoded_image(char *encoded_image_name, size_t num_tokens,
 
 float compute_avg(unsigned int *nums, size_t length) {
     float avg = 0;
-
     for (size_t i = 0; i < length; i++) {
         avg += nums[i];
     }
@@ -125,13 +126,36 @@ float compute_avg(unsigned int *nums, size_t length) {
 
 float compute_std_dev(float avg, unsigned int *nums, size_t length) {
     float std = 0;
-
     for (int i = 0; i < length; i++) {
         std += (nums[i] - avg) * (nums[i] - avg);
     }
 
-    std = std / length;
-    return sqrt(std);
+    return sqrt(std / length);
+}
+
+void write_offset_histogram(char *histogram_file_name, unsigned int *offsets,
+                            size_t num_offsets,
+                            unsigned int searching_buffer_size) {
+    size_t *offset_freq = calloc(searching_buffer_size, sizeof(*offset_freq));
+
+    for (int i = 0; i < num_offsets; i++) {
+        unsigned int offset = offsets[i];
+        offset_freq[offset] += 1;
+    }
+
+    FILE *histogram_file = fopen(histogram_file_name, "wb");
+    char csv_row[1024];
+    for (int offset = 0; offset < searching_buffer_size; offset++) {
+        size_t freq = offset_freq[offset];
+        if (freq <= 0) continue;
+
+        sprintf(csv_row, "%d, %zu\n", offset, freq);
+        size_t row_length = strlen(csv_row);
+
+        fwrite(csv_row, sizeof(*csv_row), row_length, histogram_file);
+    }
+
+    fclose(histogram_file);
 }
 
 void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
@@ -168,7 +192,12 @@ void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
                             original_image.maxGrayValue, offsets,
                             matching_lengths, next_symbols);
 
-    // TODO: write offset histogram data to another file
+    char offset_histogram_file_name[1024];
+    sprintf(offset_histogram_file_name, "%s.%u.offsets.csv",
+            in_PGM_filename_Ptr, searching_buffer_size);
+
+    write_offset_histogram(offset_histogram_file_name, offsets, num_tokens,
+                           searching_buffer_size);
 
     // TODO: write match length histogram data to another file
 
