@@ -34,8 +34,6 @@ void Decode_Using_LZ77(char *in_compressed_filename_Ptr) {
     FILE *compressed_file = fopen(in_compressed_filename_Ptr, "rb");
 
     fread(&header, sizeof(header), 1, compressed_file);
-    printf("%d, %d, %d, %d\n", header.height, header.width,
-           header.max_gray_value, header.num_tokens);
 
     unsigned int *offsets = calloc(header.num_tokens, sizeof(*offsets));
     unsigned int *matching_lengths =
