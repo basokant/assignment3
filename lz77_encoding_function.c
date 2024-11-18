@@ -151,6 +151,7 @@ void write_histogram(char *histogram_file_name, unsigned int *nums,
     }
 
     fclose(histogram_file);
+    free(frequencies);
 }
 
 void Encode_Using_LZ77(char *in_PGM_filename_Ptr,
